@@ -16,8 +16,8 @@ import { produce } from "immer";
 import defaultSheet from "../common/default-sheet";
 import { getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
 import {
-  getUserPerferenceIDB,
-  setUserPerferenceIDB,
+  getUserPreferenceIDB,
+  setUserPreferenceIDB,
 } from "@/renderer/utils/user-perference";
 
 /******************** 内存缓存 ***********************/
@@ -51,9 +51,7 @@ export function getAllStarredSheets() {
 export async function queryAllSheets() {
   try {
     // 读取全部歌单
-    const allSheets = await musicSheetDB.sheets
-      .orderBy("$$sortIndex")
-      .toArray();
+    const allSheets = await musicSheetDB.sheets.toArray();
     const dbDefaultSheet = allSheets.find(
       (item) => item.id === defaultSheet.id
     );
@@ -86,8 +84,9 @@ export async function queryAllSheets() {
  */
 export async function queryAllStarredSheets() {
   try {
-    starredMusicSheets = await getUserPerferenceIDB("starredMusicSheets");
-    return starredMusicSheets ?? [];
+    starredMusicSheets =
+      (await getUserPreferenceIDB("starredMusicSheets")) || [];
+    return starredMusicSheets;
   } catch {
     return [];
   }
@@ -226,7 +225,7 @@ export async function clearSheet(sheetId: string) {
  */
 export async function starMusicSheet(sheet: IMedia.IMediaBase) {
   const newSheets = [...starredMusicSheets, sheet];
-  await setUserPerferenceIDB("starredMusicSheets", newSheets);
+  await setUserPreferenceIDB("starredMusicSheets", newSheets);
   starredMusicSheets = newSheets;
 }
 
@@ -238,7 +237,7 @@ export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
   const newSheets = starredMusicSheets.filter(
     (item) => !isSameMedia(item, sheet)
   );
-  await setUserPerferenceIDB("starredMusicSheets", newSheets);
+  await setUserPreferenceIDB("starredMusicSheets", newSheets);
   starredMusicSheets = newSheets;
 }
 
@@ -247,7 +246,7 @@ export async function unstarMusicSheet(sheet: IMedia.IMediaBase) {
  */
 
 export async function setStarredMusicSheets(sheets: IMedia.IMediaBase[]) {
-  await setUserPerferenceIDB("starredMusicSheets", sheets);
+  await setUserPreferenceIDB("starredMusicSheets", sheets);
   starredMusicSheets = sheets;
 }
 
